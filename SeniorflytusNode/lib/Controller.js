@@ -9,6 +9,7 @@ EPS_LIN      = 0.1; // We are ok with 10 cm horizontal precision
 EPS_ALT      = 0.1; // We are ok with 10 cm altitude precision
 EPS_ANG      = 0.1; // We are ok with 0.1 rad precision (5 deg)
 STABLE_DELAY = 200; // Time in ms to wait before declaring the drone on target
+consoleCounter = 0;
 
 module.exports = Controller;
 util.inherits(Controller, EventEmitter);
@@ -257,6 +258,8 @@ Controller.prototype._go = function(goal, callback) {
 Controller.prototype._processNavdata = function(d) {
     // EKF prediction step
     this._ekf.predict(d);
+    
+
 
     // If a tag is detected by the bottom camera, we attempt a correction step
     // This require prior configuration of the client to detect the oriented
@@ -286,6 +289,7 @@ Controller.prototype._processNavdata = function(d) {
 
         // Execute the EKS correction step
         this._ekf.correct(measured, this._tag);
+        
     }
 
     // Keep a local copy of the state
@@ -369,6 +373,7 @@ Controller.prototype._control = function(d) {
     });
 
     // Send commands to drone
+    // console.log('Line 372: Sending Commands to the Drone' + consoleCounter++)
     if (Math.abs(cx) > 0.1) this._client.front(cx);
     if (Math.abs(cy) > 0.1) this._client.right(cy);
     if (Math.abs(cz) > 0.1) this._client.up(cz);

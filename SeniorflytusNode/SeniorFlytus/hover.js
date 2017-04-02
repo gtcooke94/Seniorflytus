@@ -41,7 +41,8 @@ mission.log("mission-" + df(new Date(), "yyyy-mm-dd_hh-MM-ss") + ".txt");
 
 mission.takeoff()
        .forward(2)
-       .backward(2)
+       .hover(100)
+       .backward(1)
        .land();
 
 mission.run(function (err, result) {
@@ -54,4 +55,3 @@ mission.run(function (err, result) {
         process.exit(0);
     }
 });
-
