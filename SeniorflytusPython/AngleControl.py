@@ -1,6 +1,7 @@
 ##### Suggested clean drone startup sequence #####
 import time, sys
 import ps_drone # Import PS-Drone-API
+import math #For sin, cos, etc
 
 fileName = raw_input("Log File Name: " )
 fileName = fileName + ".txt"
@@ -29,6 +30,7 @@ while drone.NavData["demo"][0][2]: time.sleep(0.1) # Wait until drone is complet
 ##### Mainprogram begin #####
 print "Drone is flying now"
 
+
 stop = False
 
 
@@ -39,14 +41,39 @@ speed = drone.speed
 ospeed = speed                                   # stores the given speed-value
 reftime = time.time()
 accurateness = 0
+f1 = open(fileName, 'w')
 
-#f1 = open(fileName, 'w')  
+
+
+## Function to calculate the angle
+def calculateAngle(mx, my):
+    radius = math.sqrt(mx * mx + my * my)
+    cosAngle = mx / radius
+    sinAngle = my / radius
+    if (sinAngle > 0):
+        angle = math.acos(cosAngle) * 180 / pi
+    else:
+        angle = 360 - math.acos(cosAngle) * 180 / pi
+    return angle
+##########################################
+## Control Counter Variables
+counter = 0  
+sumAngle = 0
+maxCounter = 10
+desiredAngle = 90
+#my DC Offset
+myOffset = -10.5
+#mx DC Offset
+mxOffset = 73.5
+angleThresh = 5
+pi = 3.14159
+###########################################
 
 # End from turnAngle   
 #drone.getSelfRotation()
 while (not stop):
     if (drone.getKey() == 'c'): stop = True
-    drone.hover()
+    #drone.hover()
     ndc = drone.NavDataCount                      # wait for the next NavData-package
     while ndc == drone.NavDataCount:
         time.sleep(0.0001)
@@ -67,7 +94,32 @@ while (not stop):
     #print "mx, my, mz = " + str(mx) + ", " + str(my) + ", " + str(mz) + "\n"
     #print "kalib = " + str(kalib)
     #print >> f1, str(mx) + ", " + str(my) + ", " + str(mz) + ", " + str(times)
-    print str(cpos)
+
+    #sumAngle += calculateAngle(mx + mxOffset, my + myOffset)
+    
+    counter += 1
+    if counter == maxCounter:
+        # Computer the average angle
+        curAngle = sumAngle/maxCounter
+
+        print >> f1, str(curAngle) + ", " + str(cpos)
+        
+        dAngle = curAngle - desiredAngle
+        if (dAngle >= angleThresh):
+            # Turn counterclockwise (left)
+            print "Turning Left"
+            #drone.turnLeft()
+        elif (dAngle <= -angleThresh):
+            # Turn clockwise (right)
+            #drone.turnRight()
+            print "Turning Right"
+        else:
+            drone.hover()
+            #print "Hovering"
+        counter = 0
+        sumAngle = 0
+
+
 
 drone.stop()
 time.sleep(2)
