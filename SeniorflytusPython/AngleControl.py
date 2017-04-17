@@ -108,10 +108,10 @@ while (not stop):
         if (dAngle >= angleThresh):
             # Turn counterclockwise (left)
             print "Turning Left"
-            #drone.turnLeft()
+            drone.turnLeft()
         elif (dAngle <= -angleThresh):
             # Turn clockwise (right)
-            #drone.turnRight()
+            drone.turnRight()
             print "Turning Right"
         else:
             drone.hover()

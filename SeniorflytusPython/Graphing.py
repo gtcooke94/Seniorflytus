@@ -52,7 +52,13 @@ xdata, ydata = [], []
 xpos = 0
 ypos = 0
 oldTime = 0
+originalTime = 0
 firstFlag = False
+drone.setSpeed(.7)
+drone.turnAngle(90, 1)
+drone.stop()
+time.sleep(1)
+drone.setSpeed(.1)
 #Writer = animation.writers['ffmpeg']
 #writer = Writer(fps=10, metadata=dict(artist='Me'), bitrate=1800)
 def getPosition(vx, vy, vz, ts, te):
@@ -63,10 +69,15 @@ def getPosition(vx, vy, vz, ts, te):
 
 def run(data):
     # update the data
+    #if (drone.getKey() == 'c'):
+    #    drone.hover()
+    #    drone.land()
+    #    process.exit()
     global xpos
     global ypos
     global oldTime
-    global firstFlag   
+    global firstFlag 
+    global originalTime  
     #drone.hover()
     ndc = drone.NavDataCount                      # wait for the next NavData-package
     while ndc == drone.NavDataCount:
@@ -85,6 +96,7 @@ def run(data):
     if (not firstFlag):
         firstFlag = True
         oldTime = timeDrone
+        originalTime = timeDrone
     getPosition(vx, vy, vz, oldTime, timeDrone)
     print xpos, ypos, timeDrone
     xdata.append(xpos)
@@ -99,10 +111,13 @@ def run(data):
         ax.figure.canvas.draw()
     '''
     line.set_data(xdata, ydata)
-    if ((timeDrone - oldTime) > 5):
-        drone.forward(1)
+    if ((timeDrone - originalTime) < 5):
+        drone.moveForward(.1)
     else:
-        drone.hover()
+        drone.stop()
+        time.sleep(1)
+        time.sleep(1)
+        drone.land()
 
     oldTime = timeDrone
 
