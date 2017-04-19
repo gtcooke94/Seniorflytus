@@ -441,6 +441,9 @@ class Drone(object):
 			if speed > ospeed:			speed = ospeed		# do not turn faster than recommended
 			if speed < 0.05:			speed = 0.05		# too slow turns causes complications with calibration
 			self.__speed = speed
+
+			print("Current Angle: " + str(cpos) + " | Attempting: " + str(npos+kalib))
+
 			if cpos > (npos+kalib):							# turn left, if destination angle is lower
 				self.turnLeft()
 				if direction   ==  0:	direction = -1
