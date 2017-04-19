@@ -27,12 +27,12 @@ print "Drone is flying now"
 stop = False
 while (not stop):
     if (drone.getKey() == 'c'): stop = True
-    drone.turnAngle(-90, .2, 1)
+    #drone.turnAngle(-90, .2, 1)
     print "Done with turn 1"
     drone.hover()
     time.sleep(2)
     print "Done with Hover"
-    drone.turnAngle(90, .2, 1)
+    #drone.turnAngle(90, .2, 1)
     print "Done with turn 2"
 
     

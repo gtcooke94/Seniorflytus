@@ -1,3 +1,4 @@
+
 ##### Suggested clean drone startup sequence #####
 import time, sys
 import ps_drone # Import PS-Drone-API
