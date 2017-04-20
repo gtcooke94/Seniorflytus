@@ -4,8 +4,9 @@ import time, sys
 import ps_drone # Import PS-Drone-API
 
 drone = ps_drone.Drone() # Start using drone	
+print("Starting Up...")
 drone.startup() # Connects to drone and starts subprocesses
-
+print("Started Up.")
 drone.reset() # Sets drone's status to good
 while (drone.getBattery()[0]==-1): time.sleep(0.1) # Wait until drone has done its reset
 print "Battery: "+str(drone.getBattery()[0])+"% "+str(drone.getBattery()[1]) # Battery-status

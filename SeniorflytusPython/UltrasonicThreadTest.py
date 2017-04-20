@@ -1,54 +1,119 @@
 import Queue
-import thread
+import thread, threading
 import time
 
-# from UltrasonicScript import *
+#from UltrasonicScript import getUltrasonic
+import UltrasonicScript
 
-# def getUltrasonic():
-# 	if run_address_change:
-# 	  change_address(old_address, new_address)
-# 	try:
-# 	  i = 0                                   # Used to cycle through address_array and read each sensor
-# 	  number_sensors = len(address_array)     # The array length is used to loop through the addresses
-# 	  while i < number_sensors:
-# 	    address = address_array[i]
-# 	    take_range(address)
-# 	    report_range(address)
-# 	    i = i + 1                             # Cycle through the array of addresses
-# 	    i = i % number_sensors                # The modulo, %, operator lets i loop back to zero for an infinite loop
-# 	except IOError:
-# 	  print "Please verify the circuit. Also verify the current sensor address by running 'sudo i2cdetect -y 1'."
+import ps_drone # Import PS-Drone-API
 
-num1 = 0
-num2 = 0
+# left_sensor = -1
+# right_sensor = -1
+# front_sensor = -1
 
-def test1():
-	global num1
+# num1 = 0
+# num2 = 0
+
+# def test1():
+# 	global num1
+# 	while True:
+# 		#print "test1"
+# 		num1 = num1 + 1
+# 		time.sleep(1)
+
+# def test2():
+# 	global num2
+# 	while True:
+# 		#print "test2"
+# 		num2 = num2 + 2
+# 		time.sleep(2)
+
+def printVals():
 	while True:
-		#print "test1"
-		num1 = num1 + 1
-		time.sleep(1)
-
-def test2():
-	global num2
-	while True:
-		#print "test2"
-		num2 = num2 + 2
+		#global left_sensor
+		#print "test2"UltrasonicScript.left_sensor
+		print "Test access: ", UltrasonicScript.left_sensor
 		time.sleep(2)
 
-def test3():
-	while True:
-		#print "test2"
-		print num1, num2
-		time.sleep(1)
+drone = ps_drone.Drone() # Start using drone	
+print("Starting Up...")
+drone.startup() # Connects to drone and starts subprocesses
+print("Started Up.")
+drone.reset()
+drone.trim() #on level ground
+
+drone.takeoff()
+time.sleep(7)
+# drone.mtrim() #rotational calibration
+drone.moveUp(0.5)
+time.sleep(2)
+drone.hover()
+time.sleep(1)
+
+# drone.move(0.3, 0, 0, 0)
+# time.sleep(2)
+# drone.hover()
+#		leftright, backwardforward, downup, turnleftright
+#      pos = left
 
 #Test Threading
 try:
-	thread.start_new_thread(test1, ())
-	thread.start_new_thread(test2, ())
-	thread.start_new_thread(test3, ())
+	thread.start_new_thread(UltrasonicScript.getUltrasonic, ())
+	thread.start_new_thread(printVals, ())
+	#thread.start_new_thread(test2, ())
 except:
    print "Thread Error"
 
-while 1:
-   pass
+key = drone.getKey()
+counter = 0
+while key != "w":
+	forwardbackward = -0.10 #pos is forward
+	leftright = 0 #pos is left
+	# keep in center of hall
+	if (UltrasonicScript.front_sensor < 200 and UltrasonicScript.front_sensor > 20):
+		counter = counter + 1
+		print counter
+		forwardbackward = 0
+		#drone.land()
+		#break
+		#drone.move(0, 0.1, 0, 0) #go forward
+	elif counter > 0:
+		print counter
+		counter = counter - 1
+
+	if (UltrasonicScript.left_sensor - UltrasonicScript.right_sensor) > 30:
+		#drone.move(0.1, 0, 0, 0) #go left
+		leftright = 0.1
+		print "going left..."
+	elif (UltrasonicScript.right_sensor - UltrasonicScript.left_sensor) > 30:
+		#drone.move(-0.1, 0, 0, 0) #go right
+		leftright = -0.1
+		print "going right..."
+	else:
+		#drone.hover()
+		print "holding..."
+
+	drone.move(leftright, forwardbackward, 0, 0)
+
+	if (counter > 25):
+		drone.land()
+		break
+
+	# 150 cm from left wall
+	# if UltrasonicScript.left_sensor > 150:
+	# 	drone.move(0.1, 0, 0, 0) #go left
+	# 	print "going left..."
+	# elif UltrasonicScript.left_sensor < 110 and UltrasonicScript.left_sensor > 20:
+	# 	drone.move(-0.1, 0, 0, 0) #go right
+	# 	print "going right..."
+	# else:
+	# 	drone.hover()
+	# 	print "holding..."
+	# time.sleep(0.1)
+
+	key = drone.getKey()
+	#pass
+
+print "Key w Pressed, Landing..."
+
+drone.land()

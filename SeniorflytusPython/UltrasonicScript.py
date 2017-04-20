@@ -27,16 +27,16 @@
 #########################################################################
 ##                           Include Modules                           ##
 #########################################################################
-from smbus import SMBus	                  # Allows Python on Linux devices to access I2C/dev interface
+from smbus import SMBus                   # Allows Python on Linux devices to access I2C/dev interface
 from time import sleep                    # Allows us to put delays in our code
 #########################################################################
 
-
+#from UltrasonicThreadTest import left_sensor
 #########################################################################
 ##                     Global Variable Definitions                     ##
 #########################################################################
 # The Raspberry Pi uses 7 bit addresses and a read/write bit.
-address_array = [0x70]                    # The hex I2C addresses in the order they are to be read
+address_array = [0x70, 0x65, 0x60]                    # The hex I2C addresses in the order they are to be read]                    # The hex I2C addresses in the order they are to be read
                                           #  Enter addresses in hex separated by commas in the square brackets, []
 
 # The following three variables only need to be adjusted if you are changing the address of your sensor.
@@ -50,21 +50,22 @@ new_address = 0x70                        # The desired new address of a sensor 
 #########################################################################
 ##                   Function: Take a Range Reading                    ##
 #########################################################################
-def take_range(address):				  
+def take_range(address):          
   SMBus(1).write_byte(address, 0x51)      # Write the sensors address and the range command, 0x51
-  sleep(0.1)                              # Allow the sensor to process the readings with a ~100mS delay
+  #sleep(0.1)                              # Allow the sensor to process the readings with a ~100mS delay
 #########################################################################
 
 
 #########################################################################
 ##                  Function: Report a Range Reading                   ##
 #########################################################################
-def report_range(address):
+def report_range(address, dir):
   latest_range = SMBus(1).read_word_data(address, 0xFF)
                                           # Commanding a read at the sensor address sends the latest range
                                           #  data as a word
                                           # A command (set to 0xFF here) is required by syntax not the part
-  print "Sensor", i, ":", ((latest_range & 0xFF) << 8) + (latest_range >> 8), 'cm'
+  #print dir, "Sensor", ":", ((latest_range & 0xFF) << 8) + (latest_range >> 8), 'cm'
+  return ((latest_range & 0xFF) << 8) + (latest_range >> 8)
                                           # The Raspberry Pi expects the high and low bytes in the opposite order
                                           #  The and operations and bit shifts essentially swap the high and low bytes
                                           #  Finally, we add the two range bytes together and print
@@ -96,16 +97,63 @@ def change_address(old_address, new_address):
 #########################################################################
 # This is a working sample code for changing sensor addresses and reading range data.
 # Feel free to add any additional code needed for your application here.
-if run_address_change:
-  change_address(old_address, new_address)
-try:
-  i = 0                                   # Used to cycle through address_array and read each sensor
-  number_sensors = len(address_array)     # The array length is used to loop through the addresses
-  while i < number_sensors:
-    address = address_array[i]
-    take_range(address)
-    report_range(address)
-    i = i + 1                             # Cycle through the array of addresses
-    i = i % number_sensors                # The modulo, %, operator lets i loop back to zero for an infinite loop
-except IOError:
-  print "Please verify the circuit. Also verify the current sensor address by running 'sudo i2cdetect -y 1'."
+# if run_address_change:
+#   change_address(old_address, new_address)
+# try:
+#   i = 0                                   # Used to cycle through address_array and read each sensor
+#   number_sensors = len(address_array)     # The array length is used to loop through the addresses
+#   while i < number_sensors:
+#     address = address_array[i]
+#     take_range(address)
+#     report_range(address)
+#     i = i + 1                             # Cycle through the array of addresses
+#     i = i % number_sensors                # The modulo, %, operator lets i loop back to zero for an infinite loop
+# except IOError:
+#   print "Please verify the circuit. Also verify the current sensor address by running 'sudo i2cdetect -y 1'."if run_address_change:
+  
+#Tests the threee sensors at once
+left_sensor = -1
+right_sensor = -1
+front_sensor = -1
+
+def getUltrasonic():
+  global left_sensor
+  global right_sensor
+  global front_sensor
+
+  old_left = left_sensor
+  old_right = right_sensor
+  old_front = front_sensor
+
+  if run_address_change:
+    change_address(old_address, new_address)
+  try:
+    i = 0                                   # Used to cycle through address_array and read each sensor
+    number_sensors = len(address_array)     # The array length is used to loop through the addresses
+    while True:
+      address1 = address_array[0]
+      address2 = address_array[1]
+      address3 = address_array[2]
+      take_range(address1)
+      take_range(address2)
+      take_range(address3)
+
+      sleep(0.06)
+
+      right_sensor = report_range(address1, "Right")
+      if int(old_right) != int(right_sensor):
+      	#print "Right Sensor: ", right_sensor
+      	old_right = right_sensor
+
+      left_sensor = report_range(address2, "Left")
+      if old_left != left_sensor:
+      	#print "Left Sensor: ", left_sensor
+      	old_left = left_sensor
+
+      front_sensor = report_range(address3, "Front")
+      if old_front != front_sensor:
+      	print "Front Sensor: ", front_sensor
+      	old_front = front_sensor
+
+  except IOError:
+    print "Please verify the circuit. Also verify the current sensor address by running 'sudo i2cdetect -y 1'."
