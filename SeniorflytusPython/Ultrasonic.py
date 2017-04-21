@@ -121,9 +121,9 @@ def getUltrasonic():
   global right_sensor
   global front_sensor
 
-  old_left = left_sensor
-  old_right = right_sensor
-  old_front = front_sensor
+  # old_left = left_sensor
+  # old_right = right_sensor
+  # old_front = front_sensor
 
   if run_address_change:
     change_address(old_address, new_address)
@@ -141,19 +141,22 @@ def getUltrasonic():
       sleep(0.06)
 
       right_sensor = report_range(address1, "Right")
-      if int(old_right) != int(right_sensor):
-      	#print "Right Sensor: ", right_sensor
-      	old_right = right_sensor
-
       left_sensor = report_range(address2, "Left")
-      if old_left != left_sensor:
-      	#print "Left Sensor: ", left_sensor
-      	old_left = left_sensor
-
       front_sensor = report_range(address3, "Front")
-      if old_front != front_sensor:
-      	print "Front Sensor: ", front_sensor
-      	old_front = front_sensor
+      
+      # if int(old_right) != int(right_sensor):
+      # 	#print "Right Sensor: ", right_sensor
+      # 	old_right = right_sensor
+
+      # if old_left != left_sensor:
+      # 	#print "Left Sensor: ", left_sensor
+      # 	old_left = left_sensor
+
+      # if old_front != front_sensor:
+      # 	print "Front Sensor: ", front_sensor
+      # 	old_front = front_sensor
 
   except IOError:
     print "Please verify the circuit. Also verify the current sensor address by running 'sudo i2cdetect -y 1'."
+  except KeyboardInterrupt:
+    pass

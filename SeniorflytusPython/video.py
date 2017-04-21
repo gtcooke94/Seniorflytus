@@ -2,6 +2,7 @@
 ##### Suggested clean drone startup sequence #####
 import time, sys
 import ps_drone # Import PS-Drone-API
+import cv2
 
 drone = ps_drone.Drone() # Start using drone	
 print("Starting Up...")
@@ -16,13 +17,12 @@ drone.useDemoMode(True) # Set 15 basic dataset/sec
 drone.setConfigAllID() # Go to multiconfiguration-mode
 drone.sdVideo() # Choose lower resolution (try hdVideo())
 drone.frontCam() # Choose front view
+drone.slowVideo() #reduces CPU usage
 CDC = drone.ConfigDataCount
 while CDC==drone.ConfigDataCount: 
 	time.sleep(0.001) # Wait until it is done (after resync)
 drone.startVideo() # Start video-function
-drone.showVideo() # Display the video
-
-
+#drone.showVideo() # Display the video
 
 ##### And action !
 print "Use to toggle front- and groundcamera, any other key to stop"
@@ -33,6 +33,12 @@ while not stop:
 	while drone.VideoImageCount==IMC: 
 		time.sleep(0.01)	# Wait until the next video-frame
 	IMC = drone.VideoImageCount
+	##
+	## FIND FACE!!!!
+
+	cv2.imshow("ArDrone Image", drone.VideoImage)
+	key=cv2.waitKey(1)
+	##
 	key = drone.getKey()
 	if key==" ": 
 		if ground: ground = False

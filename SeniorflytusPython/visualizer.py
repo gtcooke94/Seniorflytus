@@ -1,4 +1,4 @@
-from tkinter import *
+from Tkinter import *
 from grid import *
 import threading
 
@@ -167,7 +167,7 @@ class Visualizer():
 
         # Draw grid and any initial items
         self.setup()
-        self.drawpath()
+        #self.drawpath()
 
         # Start mainloop and indicate that it is running
         self.running.set()

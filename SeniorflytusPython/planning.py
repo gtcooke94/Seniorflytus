@@ -1,7 +1,7 @@
 from grid import *
 from visualizer import *
 import threading
-from queue import PriorityQueue
+from Queue import PriorityQueue
 import math
 
 def astar(grid, heuristic):

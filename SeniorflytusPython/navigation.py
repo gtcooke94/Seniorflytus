@@ -60,8 +60,8 @@ from planning import *
 #start = (49,24)
 #goal = (51,24)
 
-start = (1,1)
-goal = (51,47)
+start = (2,1)
+goal = (51,40)
 
 headings = setup(start, goal) #sets up grid
 
