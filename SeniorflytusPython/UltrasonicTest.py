@@ -71,6 +71,7 @@ def change_address(old_address, new_address):
 # Ultrasonic Main Loop Function
 def UltrasonicTakeRange():
 	i = 0
+	global address_array
 	if run_address_change:
 		change_address(old_address, new_address)
 	try:                                 
@@ -86,6 +87,7 @@ def UltrasonicTakeRange():
 def UltrasonicReportRange():
 	i = 0
 	values = [0,0]
+	global address_array
 	try:                                 
 		# Used to cycle through address_array and read each sensor
 		number_sensors = len(address_array)     # The array length is used to loop through the addresses
@@ -161,16 +163,16 @@ while (True):
 	my = navData["magneto"][0][1]
 	mz = navData["magneto"][0][2]
 	timeDrone = navData["time"][0]
-	sensorTimeNow = lastSensorReadTime
 	if (not firstFlag):
 		firstFlag = True
 		oldTime = timeDrone
-		lastSensorReadTime = timeDrone
 		originalTime = timeDrone
 	#getPosition(vx, vy, vz, oldTime, timeDrone)
 	oldTime = timeDrone
 
 	#Get Ultrasonic Data
+	print timeDrone, lastSensorReadTime
+	print flagToGet
 	if (flagToRead):
 		# Read ultrasonic sensor
 		UltrasonicTakeRange()
@@ -178,7 +180,7 @@ while (True):
 		flagToRead = False
 		lastSensorReadTime = timeDrone
 		print "Sensor -> Bus"
-	elif (flagToGet and ((timeDrone - lastSensorReadTime) > .1)):
+	if (flagToGet and ((timeDrone - lastSensorReadTime) > .1)):
 		ultrasonicValues = UltrasonicReportRange()
 		flagToRead = True
 		flagToGet = False

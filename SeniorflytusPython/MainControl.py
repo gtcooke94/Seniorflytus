@@ -50,6 +50,9 @@ t3.start()
 #t5.daemon = True
 #t5.start()
 
+t6 = threading.Thread(target=NavData.getNavData)
+t6.daemon = True
+t6.start()
 #Keep Main Thread Alive
 try:
 	while 1:

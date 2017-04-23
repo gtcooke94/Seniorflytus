@@ -30,7 +30,7 @@ while drone.NavData["demo"][0][2]: time.sleep(0.1) # Wait until drone is complet
 ##### Mainprogram begin #####
 print "Drone is flying now"
 
-
+drone.hover()
 stop = False
 
 
@@ -45,16 +45,7 @@ f1 = open(fileName, 'w')
 
 
 
-## Function to calculate the angle
-def calculateAngle(mx, my):
-    radius = math.sqrt(mx * mx + my * my)
-    cosAngle = mx / radius
-    sinAngle = my / radius
-    if (sinAngle > 0):
-        angle = math.acos(cosAngle) * 180 / pi
-    else:
-        angle = 360 - math.acos(cosAngle) * 180 / pi
-    return angle
+
 ##########################################
 ## Control Counter Variables
 counter = 0  
@@ -74,13 +65,14 @@ pi = 3.14159
 while (not stop):
     if (drone.getKey() == 'c'): stop = True
     #drone.hover()
-    ndc = drone.NavDataCount                      # wait for the next NavData-package
+    ndc = drone.NavDataCount   
+    desiredAngle = navData["demo"][2][2]                   # wait for the next NavData-package
     while ndc == drone.NavDataCount:
         time.sleep(0.0001)
 
     kalib = (time.time()-reftime)*drone.selfRotation # trys to recalibrate, causing moving sensor-values around 0.0185 deg/sec
     navData = drone.NavData
-    cpos = navData["demo"][2][2]             # get the current angle
+    angle = navData["demo"][2][2]             # get the current angle
     vx = navData["demo"][4][0]
     vy = navData["demo"][4][1]
     vz = navData["demo"][4][2]
@@ -88,7 +80,7 @@ while (not stop):
     my = navData["magneto"][0][1]
     mz = navData["magneto"][0][2]
     times = navData["time"][0]
-    #print "cpos = " + str(cpos)
+    #print "angle = " + str(angle)s
     #print >> f1, "vx, vy, vz = " + str(vx) + ", " + str(vy) + ", " + str(vz)
     #print >> f1, "mx, my, mz = " + str(mx) + ", " + str(my) + ", " + str(mz) + "\n"
     #print "mx, my, mz = " + str(mx) + ", " + str(my) + ", " + str(mz) + "\n"
@@ -96,28 +88,26 @@ while (not stop):
     #print >> f1, str(mx) + ", " + str(my) + ", " + str(mz) + ", " + str(times)
 
     #sumAngle += calculateAngle(mx + mxOffset, my + myOffset)
-    
-    counter += 1
-    if counter == maxCounter:
-        # Computer the average angle
-        curAngle = sumAngle/maxCounter
 
-        print >> f1, str(curAngle) + ", " + str(cpos)
-        
-        dAngle = curAngle - desiredAngle
-        if (dAngle >= angleThresh):
-            # Turn counterclockwise (left)
-            print "Turning Left"
-            drone.turnLeft()
-        elif (dAngle <= -angleThresh):
-            # Turn clockwise (right)
-            drone.turnRight()
-            print "Turning Right"
-        else:
-            drone.hover()
-            #print "Hovering"
-        counter = 0
-        sumAngle = 0
+
+    
+
+    print >> f1, str(angle) + ", " + str(desiredAngle)
+    
+    dAngle = angle - desiredAngle
+    if (dAngle >= angleThresh):
+        # Turn counterclockwise (left)
+        print "Turning Left"
+        drone.move(0, 0, 0, -.1)
+    elif (dAngle <= -angleThresh):
+        # Turn clockwise (right)
+        drone.move(0, 0, 0, .1)
+        print "Turning Right"
+    else:
+        drone.hover()
+        #print "Hovering"
+    counter = 0
+    sumAngle = 0
 
 
 
